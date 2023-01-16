@@ -18,12 +18,9 @@ public class HandsResultGlRenderer implements ResultGlRenderer<HandsResult> {
     private static final float[] LEFT_HAND_CONNECTION_COLOR = new float[] {0.2f, 1f, 0.2f, 1f};
     private static final float[] RIGHT_HAND_CONNECTION_COLOR = new float[] {1f, 0.2f, 0.2f, 1f};
     private static final float CONNECTION_THICKNESS = 10.0f;
-    private static final float[] LEFT_HAND_HOLLOW_CIRCLE_COLOR = new float[] {0.2f, 0.2f, 0.2f, 1f};
-    private static final float[] RIGHT_HAND_HOLLOW_CIRCLE_COLOR = new float[] {0.2f, 0.2f, 0.2f, 1f};
-    private static final float HOLLOW_CIRCLE_RADIUS = 0.005f;
     private static final float[] LEFT_HAND_LANDMARK_COLOR = new float[] {1f, 1f, 1f, 1f};
     private static final float[] RIGHT_HAND_LANDMARK_COLOR = new float[] {1f, 1f, 1f, 1f};
-    private static final float LANDMARK_RADIUS = 0.003f;
+    private static final float LANDMARK_RADIUS = 0.004f;
     private static final int NUM_SEGMENTS = 120;
     private static final String VERTEX_SHADER =
             "uniform mat4 uProjectionMatrix;\n"
@@ -83,11 +80,6 @@ public class HandsResultGlRenderer implements ResultGlRenderer<HandsResult> {
                         landmark.getX(),
                         landmark.getY(),
                         isLeftHand ? LEFT_HAND_LANDMARK_COLOR : RIGHT_HAND_LANDMARK_COLOR);
-                // Draws a hollow circle around the landmark.
-                drawHollowCircle(
-                        landmark.getX(),
-                        landmark.getY(),
-                        isLeftHand ? LEFT_HAND_HOLLOW_CIRCLE_COLOR : RIGHT_HAND_HOLLOW_CIRCLE_COLOR);
             }
         }
 
@@ -143,27 +135,5 @@ public class HandsResultGlRenderer implements ResultGlRenderer<HandsResult> {
         GLES20.glEnableVertexAttribArray(positionHandle);
         GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, vertexCount);
-    }
-
-    private void drawHollowCircle(float x, float y, float[] colorArray) {
-        GLES20.glUniform4fv(colorHandle, 1, colorArray, 0);
-        int vertexCount = NUM_SEGMENTS + 1;
-        float[] vertices = new float[vertexCount * 3];
-        for (int i = 0; i < vertexCount; i++) {
-            float angle = 2.0f * i * (float) Math.PI / NUM_SEGMENTS;
-            int currentIndex = 3 * i;
-            vertices[currentIndex] = x + (float) (HOLLOW_CIRCLE_RADIUS * Math.cos(angle));
-            vertices[currentIndex + 1] = y + (float) (HOLLOW_CIRCLE_RADIUS * Math.sin(angle));
-            vertices[currentIndex + 2] = 0;
-        }
-        FloatBuffer vertexBuffer =
-                ByteBuffer.allocateDirect(vertices.length * 4)
-                        .order(ByteOrder.nativeOrder())
-                        .asFloatBuffer()
-                        .put(vertices);
-        vertexBuffer.position(0);
-        GLES20.glEnableVertexAttribArray(positionHandle);
-        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
-        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, vertexCount);
     }
 }

@@ -24,6 +24,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    aaptOptions {
+        noCompress "tflite"
+    }
 }
 
 dependencies {
@@ -35,7 +39,17 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
     // MediaPipe Hands Solution.
     implementation 'com.google.mediapipe:solution-core:latest.release'
     implementation 'com.google.mediapipe:hands:latest.release'
+
+    // Tensorflow
+    implementation 'org.tensorflow:tensorflow-lite:2.11.0'
+    // This dependency adds the necessary TF op support.
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.11.0'
+
+    //implementation 'org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.0'
+    //implementation 'org.tensorflow:tensorflow-lite-gpu:2.9.0'
+    //implementation 'org.tensorflow:tensorflow-lite-task-vision:0.4.0'
 }
