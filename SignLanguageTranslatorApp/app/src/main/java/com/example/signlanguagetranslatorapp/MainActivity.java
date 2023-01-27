@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.time.LocalTime;
 import java.util.List;
 
 /** Main activity of MediaPipe Hands app. */
@@ -85,11 +86,16 @@ public class MainActivity extends AppCompatActivity {
 
     private SolutionGlSurfaceView<HandsResult> glSurfaceView;
 
-    Interpreter model;
     String[] actions = new String[] {
             "1시","2시","3시","4시","5시","6시","7시","8시","9시","10시","11시","12시",
-            "오후","오전","만나다","내일","오늘","좋아","싫어","나","바쁘다","카페","안돼"
+            "오후","오전","만나다","내일","오늘","좋아","싫어","나","바쁘다","카페","안돼","왜","전화받다","전화걸다","안녕"
     };
+    String[] action_seq = new String[] {"", "", ""};
+    String[] sentence = new String[] {"","","","","","","","","","","","","","","","","","","",""};
+    int sentence_index = 0;
+    String word = "?";
+    Long term = System.currentTimeMillis()-6000;
+    float[][][] input = new float[1][10][104];
 
 
     @Override
@@ -170,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 handsResult -> {
                     logWristLandmark(handsResult, /*showPixelValues=*/ false);
 
-                    signDetect(handsResult);
+                    signDetectData(handsResult);
 
                     glSurfaceView.setRenderData(handsResult);
                     glSurfaceView.requestRender();
@@ -253,36 +259,49 @@ public class MainActivity extends AppCompatActivity {
 
 
     // 수어 인식
-    private void signDetect(HandsResult result) {
+    private void signDetectData(HandsResult result) {
+
+        TextView resultText = (TextView)findViewById(R.id.resultText);
+        String printText = "";
+        for (int t=0; t<20; t++) {
+            if (sentence[t] == "") {
+                break;
+            } else {
+                printText = printText + " " + sentence[t];
+            }
+        }
+        resultText.setText(Float.toString(Math.round((System.currentTimeMillis() - term)/100)/10.0f) + printText);
+
         if (result.multiHandLandmarks().isEmpty()) {
             return;
         }
-        TextView resultText = (TextView)findViewById(R.id.resultText);
 
         // 한손씩 계산
         for (int n=0; n < result.multiHandLandmarks().size(); n++) {
             // 조인트 데이터 전처리
-            /*
             List<NormalizedLandmark> joint = result.multiHandLandmarks().get(n).getLandmarkList();
 
             float[][] j1 = new float[20][3];
             float[][] j2 = new float[20][3];
             float[][] v = new float[21][3];
             float[] angle = new float[16];
-            float[] d = new float[82];
+            float[] d = new float[104];
 
 
             // double타입 어레이로 변환
+            //[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], :3]
             for (int i=1; i < 20; i++) {
                 j1[i][0] = joint.get(i).getX();
                 j1[i][1] = joint.get(i).getY();
                 j1[i][2] = joint.get(i).getZ();
             }
+            //[[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19], :3]
             for (int i=0; i < 19; i++) {
                 j2[i][0] = joint.get(i).getX();
                 j2[i][1] = joint.get(i).getY();
                 j2[i][2] = joint.get(i).getZ();
             }
+            //[[0,1,2,3,0,5,6,7,0,9,10,11,0,13,14,15,0,17,18,19], :3]
             j2[4] = j2[0];
             j2[8] = j2[0];
             j2[12] = j2[0];
@@ -291,7 +310,9 @@ public class MainActivity extends AppCompatActivity {
             // 각 조인트의 벡터 구하기
             v[0][0] = j2[0][0] - (float)0.5;
             v[0][1] = j2[0][1] - (float)0.5;
-            v[0][2] = j2[0][2] - (float)0;
+            v[0][2] = j2[0][2] - (float)-1;
+            //[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], :3]
+            //[[0,1,2,3,0,5,6,7,0,9 ,10,11,0 ,13,14,15,0 ,17,18,19], :3]
             for (int j=0; j<20; j++) {
                 v[j+1][0] = j1[j][0] - j2[j][0];
                 v[j+1][1] = j1[j][1] - j2[j][1];
@@ -299,12 +320,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // 내적 구하고 아크코사인
+            //[[0,1,2,3,-,5,6,7,-,9 ,10,11,-,13,14,15,-,17,18,19], :3]
+            //[[1,2,3,4,-,6,7,8,-,10,11,12,-,14,15,16,-,18,19,20], :3]
             int temp = 0;
             for (int j=0; j<20; j++) {
                 if (j==4 || j==8 || j==12 || j==16) {
                     temp++;
                 }else{
-                    angle[j-temp] = v[j][0] * v[j + 1][0] + v[j][1] * v[j + 1][1] + v[j][2] * v[j + 1][2];
+                    angle[j-temp] =
+                            v[j][0] * v[j + 1][0] +
+                            v[j][1] * v[j + 1][1] +
+                            v[j][2] * v[j + 1][2];
                 }
             }
             for (int k=0; k<16; k++) {
@@ -313,58 +339,106 @@ public class MainActivity extends AppCompatActivity {
 
             // 조인트 좌표와 각도 평탄화
             for (int k=0; k<21; k++) {
-                d[k*3] = joint.get(k).getX();
-                d[k*3+1] = joint.get(k).getY();
-                d[k*3+2] = joint.get(k).getZ();
+                d[k*4] = joint.get(k).getX();
+                d[k*4+1] = joint.get(k).getY();
+                d[k*4+2] = joint.get(k).getZ();
+                d[k*4+3] = 0;
             }
-            d[63] = (float) 0.5;
-            d[64] = (float) 0.5;
-            d[65] = (float) 0;
+            d[84] = (float) 0.5;
+            d[85] = (float) 0.5;
+            d[86] = (float) -1;
             for (int k=0; k<16; k++) {
-                d[66+k] = angle[k];
+                d[87+k] = angle[k];
             }
-            */
 
+            // 데이터 축적
+            for (int k=0; k<9; k++) {
+                input[0][k] = input[0][k+1].clone();
+            }
+            input[0][9] = d;
 
-            /*
-            converted_model.tflite : 최초 변환 모델 (작동안됨)
-            model_1.tflite : 옵션 끈거 / input:[82], output[23]
-            model_2.tflite : 옵션 킨거 / input:[82], output[23]
-            test.tflite : 등차수열 예측 / input:[3], output[1][1]
-            */
+            //10개 모였는지 체크
+            if (input[0][0][86] != -1) {
+                continue;
+            }
 
-            // 등차수열예측
-            int[] input = new int[] {1,2,3};
-            float[][] output = new float[1][1];
-            Interpreter model = getTfliteInterpreter("test.tflite");
+            float[][] output = new float[1][27];
+            Interpreter tflite = getTfliteInterpreter("model_5.tflite");
             try {
-                model.run(input, output);
-                resultText.setText(Float.toString(output[0][0]));
-            }catch (Exception e){
-                resultText.setText(e.getMessage());
-            }
+                tflite.run(input, output);
 
-            // 우리거 예측
-            /*
-            float[] output = new float[23];
-            Interpreter model = getTfliteInterpreter("model_2.tflite");
-            try {
-                model.run(d, output);
-            }catch (Exception e){
-                resultText.setText(e.getMessage());
-            }
-            */
-
-            // 인식결과 출력
-            /*
-            int outputMaxIndex = 0;
-            for (int l = 0; l < 28; l++) {
-                if (output[outputMaxIndex] < output[l]) {
-                    outputMaxIndex = l;
+                // 출력
+                TextView result1 = (TextView)findViewById(R.id.result1);
+                String outputText = "";
+                /*
+                for (int wtf=0; wtf<27; wtf++) {
+                    outputText = outputText + "/" + Float.toString(output[0][wtf]);
                 }
+                */
+                outputText = String.valueOf(output.length);
+                outputText = outputText + "asdasd";
+                result1.setText(outputText);
+
+
+
+                // 제일 유사한 수어 확인
+                int outputMaxIndex = 0;
+                for (int l = 0; l < 27; l++) {
+                    if (output[0][outputMaxIndex] < output[0][l]) {
+                        outputMaxIndex = l;
+                    }
+                }
+                // 분석 결과 스택
+                if (output[0][outputMaxIndex] > 0.85) {
+                    action_seq[0] = action_seq[1];
+                    action_seq[1] = action_seq[2];
+                    action_seq[2] = actions[outputMaxIndex];
+
+                    // 결과 검증 | 연속적으로 3회동안 같은 결과가 나왔는가?
+                    String this_action = "?";
+                    if (action_seq[0] == action_seq[1] && action_seq[1] == action_seq[2]) {
+                        this_action = actions[outputMaxIndex];
+                    }
+
+                    // 기존 단어와 다른 단어가 인식되었을 때
+
+                    if (word != this_action) {
+                        // 일단 문장에 추가
+                        sentence[sentence_index] = this_action;
+                        sentence_index++;
+
+                        // 단어간 인식 텀이 너무 길면 문장 초기화
+                        if (System.currentTimeMillis()-term > 6000) {
+                            sentence = new String[] {"","","","","","","","","","","","","","","","","","","",""};
+                            sentence[0] = this_action;
+                            sentence_index = 1;
+
+                        // 새 단어가 충분한 시간동안 인식되었으면 통과
+                        } else if (System.currentTimeMillis()-term > 2000) {
+                            // 이전 단어가 "?" 였다면 삭제
+                            if (sentence[sentence_index-2] == "?") {
+                                sentence[sentence_index-2] = sentence[sentence_index-1];
+                                sentence[sentence_index-1] = "";
+                                sentence_index--;
+                            }
+
+                        // 너무 짧은 시간동안 인식 변동이 있었다면 삭제
+                        } else {
+                            sentence[sentence_index-2] = sentence[sentence_index-1];
+                            sentence[sentence_index-1] = "";
+                            sentence_index--;
+                        }
+
+                        // 단어 및 시간 초기화
+                        word = "?";
+                        term = System.currentTimeMillis();
+                    }
+                }
+                tflite.close();
+
+            }catch (Exception e){
+                resultText.setText(e.getMessage());
             }
-            resultText.setText(actions[outputMaxIndex]);
-            */
 
         }
     }
