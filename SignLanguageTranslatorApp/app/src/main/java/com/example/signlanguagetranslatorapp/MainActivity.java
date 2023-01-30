@@ -15,12 +15,14 @@ package com.example.signlanguagetranslatorapp;
 // limitations under the License.
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
@@ -49,10 +51,13 @@ import com.google.mediapipe.solutions.hands.HandsResult;
 
 import org.tensorflow.lite.Interpreter;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.time.LocalTime;
@@ -88,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
     String[] actions = new String[] {
             "1시","2시","3시","4시","5시","6시","7시","8시","9시","10시","11시","12시",
-            "오후","오전","만나다","내일","오늘","좋아","싫어","나","바쁘다","카페","안돼","왜","전화받다","전화걸다","안녕"
+            "오후","오전","만나다","내일","오늘","좋아","나","너","바쁘다","카페","안돼","왜","전화받다","전화걸다","안녕"
     };
     String[] action_seq = new String[] {"", "", ""};
     String[] sentence = new String[] {"","","","","","","","","","","","","","","","","","","",""};
@@ -363,22 +368,42 @@ public class MainActivity extends AppCompatActivity {
             }
 
             float[][] output = new float[1][27];
-            Interpreter tflite = getTfliteInterpreter("model_5.tflite");
+            Interpreter tflite = getTfliteInterpreter("model_mb1.tflite");
             try {
                 tflite.run(input, output);
 
                 // 출력
                 TextView result1 = (TextView)findViewById(R.id.result1);
+                TextView result2 = (TextView)findViewById(R.id.result2);
+                TextView result3 = (TextView)findViewById(R.id.result3);
                 String outputText = "";
-                /*
+
                 for (int wtf=0; wtf<27; wtf++) {
-                    outputText = outputText + "/" + Float.toString(output[0][wtf]);
+                    outputText = outputText + "  " + actions[wtf] + ":";
+                    outputText += Float.toString(Math.round(output[0][wtf]*100)/100.0f);
                 }
-                */
-                outputText = String.valueOf(output.length);
-                outputText = outputText + "asdasd";
                 result1.setText(outputText);
 
+                outputText = action_seq[0]+ "/" +action_seq[1]+ "/" +action_seq[2];
+                result2.setText(outputText);
+
+                //##########################################################
+                // 데이타 평준화
+                outputText = "[";
+                for (int wtf=0; wtf<104; wtf++) {
+                    outputText += String.valueOf(d[wtf]);
+                    outputText += "/";
+                }
+                outputText = "]";
+
+                /*
+                String foldername = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+                String filename = "logfile.txt";
+
+                WriteTextFile(foldername, filename, outputText);
+
+                stopCurrentPipeline();
+                */
 
 
                 // 제일 유사한 수어 확인
@@ -389,7 +414,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 // 분석 결과 스택
-                if (output[0][outputMaxIndex] > 0.85) {
+                if (output[0][outputMaxIndex] > 0.9) {
                     action_seq[0] = action_seq[1];
                     action_seq[1] = action_seq[2];
                     action_seq[2] = actions[outputMaxIndex];
@@ -442,6 +467,30 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+    /*
+    //텍스트내용을 경로의 텍스트 파일에 쓰기
+    public void WriteTextFile(String foldername, String filename, String contents){
+        try{
+            File dir = new File (foldername);
+            //디렉토리 폴더가 없으면 생성함
+            if(!dir.exists()){
+                dir.mkdir();
+            }
+            //파일 output stream 생성
+            FileOutputStream fos = new FileOutputStream(foldername+"/"+filename, true);
+            //파일쓰기
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+            writer.write(contents);
+            writer.flush();
+
+            writer.close();
+            fos.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+    */
 
     // 학습모델 전처리
     private MappedByteBuffer loadModelFile(Activity activity, String modelPath) throws IOException {
