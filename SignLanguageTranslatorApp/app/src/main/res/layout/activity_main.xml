@@ -40,7 +40,7 @@
         android:textSize="10dp"
         android:singleLine="true"
         android:text="- 2 -" />
-    <TextView
+    <EditText
         android:id="@+id/result3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -88,6 +88,24 @@
             android:textAllCaps="false"
             android:textColor="#000000"
             android:textSize="18dp"
+            app:cornerRadius="30dp"
+            app:strokeColor="#000000"
+            app:strokeWidth="2dp" />
+
+        <Button
+            android:id="@+id/button_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#FFFFFF"
+            android:shadowColor="#909090"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="2"
+            android:text="Connect Server"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="18dp"
+
             app:cornerRadius="30dp"
             app:strokeColor="#000000"
             app:strokeWidth="2dp" />

@@ -21,6 +21,7 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -31,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,12 +54,16 @@ import com.google.mediapipe.solutions.hands.HandsResult;
 import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.time.LocalTime;
@@ -91,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SolutionGlSurfaceView<HandsResult> glSurfaceView;
 
+    // tflite
     String[] actions = new String[] {
             "1시","2시","3시","4시","5시","6시","7시","8시","9시","10시","11시","12시",
             "오후","오전","만나다","내일","오늘","좋아","나","너","바쁘다","카페","안돼","왜","전화받다","전화걸다","안녕"
@@ -100,8 +107,29 @@ public class MainActivity extends AppCompatActivity {
     int sentence_index = 0;
     String word = "?";
     Long term = System.currentTimeMillis()-6000;
-    float[][][] input = new float[1][10][104];
+    //float[][][] input = new float[1][10][104];
 
+    int dataSize = 10 -1;
+    String[] stackedData = new String[dataSize+1];
+
+    // connection
+    private Socket client;
+    private DataOutputStream dataOutput;
+    private DataInputStream dataInput;
+    private String ip = "211.106.58.229";
+    private int port = 8080;
+    private int bufferSize = 1024;
+    private static String CONNECT_MSG = "connect";
+    private static String STOP_MSG = "stop";
+
+    // Views
+    /*
+    Button startCameraButton = findViewById(R.id.button_start_camera);
+    Button ServerButton = findViewById(R.id.button_connect);
+    TextView result1 = (TextView)findViewById(R.id.result1);
+    TextView result2 = (TextView)findViewById(R.id.result2);
+    TextView result3 = (EditText)findViewById(R.id.result3);
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +137,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
-        setupLiveDemoUiComponents();
+
+        Button startCameraButton = findViewById(R.id.button_start_camera);
+        startCameraButton.setVisibility(View.GONE);
+
+        setServerConnection();
+        //setupLiveDemoUiComponents();
     }
 
     @Override
@@ -136,6 +169,81 @@ public class MainActivity extends AppCompatActivity {
             videoInput.pause();
         }
     }
+
+    /** 서버 연결 */
+    private void setServerConnection() {
+        Button ServerButton = findViewById(R.id.button_connect);
+        ServerButton.setOnClickListener(
+                v -> {
+                    Connect connect = new Connect();
+                    connect.execute(CONNECT_MSG);
+                });
+
+        //카메라 시작 대기상태로
+        /*
+        //Button ServerButton = findViewById(R.id.button_start_camera);
+        //Button startCameraButton = findViewById(R.id.button_start_camera);
+        ServerButton.setVisibility(View.GONE);
+        startCameraButton.setVisibility(View.VISIBLE);
+        setupLiveDemoUiComponents();
+        */
+    }
+    private class Connect extends AsyncTask<String , String, Void> {
+        String output_message;
+        String input_message;
+
+        @Override
+        protected Void doInBackground(String[] strings) {
+            try {
+                client = new Socket(ip, port);
+                dataOutput = new DataOutputStream(client.getOutputStream());
+                dataInput = new DataInputStream(client.getInputStream());
+                output_message = strings[0];
+                output_message = "123.123,56,/789.787,34";
+                dataOutput.writeBytes(output_message);
+
+            } catch (Exception e) {
+                Log.w("??", e);
+            }
+
+            while (true){
+                try {
+                    byte[] buf = new byte[bufferSize];
+                    int read_Byte  = dataInput.read(buf);
+                    input_message = new String(buf, 0, read_Byte);
+                    if (!input_message.equals(STOP_MSG)){
+                        publishProgress(input_message);
+                    }
+                    else{
+                        break;
+                    }
+                    Thread.sleep(2);
+                } catch (Exception e) {
+                    Log.w("????", e);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String[] params) {
+            TextView result2 = (TextView)findViewById(R.id.result2);
+            TextView result3 = (EditText)findViewById(R.id.result3);
+            result2.setText(""); // Clear the chat box
+            result2.append("보낸 메세지: " + output_message );
+            result3.setText(""); // Clear the chat box
+            result3.append("받은 메세지: " + params[0]);
+        }
+
+        @Override
+        protected void onCancelled() {
+            // cancel() 메소드가 호출되었을때 즉,
+            // 강제로 취소하라는 명령이 호출되었을 때
+            // 스레드가 취소되기 전에 수행할 작업(메인 스레드)
+            // super.onCancelled();
+        }
+    }
+
 
     /** Sets up the UI components for the live demo with camera input. */
     private void setupLiveDemoUiComponents() {
@@ -286,6 +394,21 @@ public class MainActivity extends AppCompatActivity {
             // 조인트 데이터 전처리
             List<NormalizedLandmark> joint = result.multiHandLandmarks().get(n).getLandmarkList();
 
+            String data = "";
+            // 조인트 좌표와 각도 평탄화
+            for (int k=0; k<21; k++) {
+                data += joint.get(k).getX() + ",";
+                data += joint.get(k).getY() + ",";
+                data += joint.get(k).getZ() + ",";
+                data += "0";
+            }
+            // 데이터 축적
+            for (int k=0; k<dataSize; k++) {
+                stackedData[k] = stackedData[k+1];
+            }
+            stackedData[dataSize] = data;
+
+            /*
             float[][] j1 = new float[20][3];
             float[][] j2 = new float[20][3];
             float[][] v = new float[21][3];
@@ -362,6 +485,7 @@ public class MainActivity extends AppCompatActivity {
             }
             input[0][9] = d;
 
+
             //10개 모였는지 체크
             if (input[0][0][86] != -1) {
                 continue;
@@ -375,7 +499,7 @@ public class MainActivity extends AppCompatActivity {
                 // 출력
                 TextView result1 = (TextView)findViewById(R.id.result1);
                 TextView result2 = (TextView)findViewById(R.id.result2);
-                TextView result3 = (TextView)findViewById(R.id.result3);
+                TextView result3 = (EditText)findViewById(R.id.result3);
                 String outputText = "";
 
                 for (int wtf=0; wtf<27; wtf++) {
@@ -387,23 +511,15 @@ public class MainActivity extends AppCompatActivity {
                 outputText = action_seq[0]+ "/" +action_seq[1]+ "/" +action_seq[2];
                 result2.setText(outputText);
 
-                //##########################################################
+
                 // 데이타 평준화
-                outputText = "[";
+                String Tempresult = "[";
                 for (int wtf=0; wtf<104; wtf++) {
-                    outputText += String.valueOf(d[wtf]);
-                    outputText += "/";
+                    Tempresult += String.valueOf(d[wtf]);
+                    Tempresult += "/";
                 }
-                outputText = "]";
-
-                /*
-                String foldername = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-                String filename = "logfile.txt";
-
-                WriteTextFile(foldername, filename, outputText);
-
-                stopCurrentPipeline();
-                */
+                Tempresult += "]";
+                result3.setText(Tempresult);
 
 
                 // 제일 유사한 수어 확인
@@ -464,33 +580,10 @@ public class MainActivity extends AppCompatActivity {
             }catch (Exception e){
                 resultText.setText(e.getMessage());
             }
+            */
 
         }
     }
-
-    /*
-    //텍스트내용을 경로의 텍스트 파일에 쓰기
-    public void WriteTextFile(String foldername, String filename, String contents){
-        try{
-            File dir = new File (foldername);
-            //디렉토리 폴더가 없으면 생성함
-            if(!dir.exists()){
-                dir.mkdir();
-            }
-            //파일 output stream 생성
-            FileOutputStream fos = new FileOutputStream(foldername+"/"+filename, true);
-            //파일쓰기
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
-            writer.write(contents);
-            writer.flush();
-
-            writer.close();
-            fos.close();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-    */
 
     // 학습모델 전처리
     private MappedByteBuffer loadModelFile(Activity activity, String modelPath) throws IOException {
