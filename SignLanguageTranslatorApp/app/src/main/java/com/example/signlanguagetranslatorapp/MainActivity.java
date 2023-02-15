@@ -29,6 +29,8 @@ import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -68,6 +70,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Locale;
 
 /** Main activity of MediaPipe Hands app. */
 public class MainActivity extends AppCompatActivity {
@@ -118,9 +121,12 @@ public class MainActivity extends AppCompatActivity {
     private DataInputStream dataInput;
     private String ip = "211.106.58.229";
     private int port = 8080;
-    private int bufferSize = 1024;
+    private int bufferSize = 256;
     private static String CONNECT_MSG = "connect";
     private static String STOP_MSG = "stop";
+
+    // tts
+    private TextToSpeech tts;
 
     // Views
     /*
@@ -138,10 +144,34 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    //tts.setLanguage(Locale.KOREA);
+                    tts.setLanguage(Locale.ENGLISH);
+                }
+            }
+        });
+
         Button startCameraButton = findViewById(R.id.button_start_camera);
         startCameraButton.setVisibility(View.GONE);
 
-        setServerConnection();
+        Button ServerButton = findViewById(R.id.button_connect);
+        ServerButton.setOnClickListener(
+                v -> {
+                    // 서버 연결
+                    //Connect connect = new Connect();
+                    //connect.execute(CONNECT_MSG);
+                    ServerConnect serverConnect = new ServerConnect();
+                    serverConnect.start();
+
+
+                    //Button startCameraButton = findViewById(R.id.button_start_camera);
+                    startCameraButton.setVisibility(View.VISIBLE);
+                    ServerButton.setVisibility(View.GONE);
+                    setupLiveDemoUiComponents();
+                });
         //setupLiveDemoUiComponents();
     }
 
@@ -171,79 +201,132 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /** 서버 연결 */
-    private void setServerConnection() {
-        Button ServerButton = findViewById(R.id.button_connect);
-        ServerButton.setOnClickListener(
-                v -> {
-                    Connect connect = new Connect();
-                    connect.execute(CONNECT_MSG);
-                });
-
-        //카메라 시작 대기상태로
-        /*
-        //Button ServerButton = findViewById(R.id.button_start_camera);
-        //Button startCameraButton = findViewById(R.id.button_start_camera);
-        ServerButton.setVisibility(View.GONE);
-        startCameraButton.setVisibility(View.VISIBLE);
-        setupLiveDemoUiComponents();
-        */
-    }
-    private class Connect extends AsyncTask<String , String, Void> {
-        String output_message;
-        String input_message;
-
-        @Override
-        protected Void doInBackground(String[] strings) {
+    class ServerConnect extends Thread {
+        public void run() {
             try {
                 client = new Socket(ip, port);
                 dataOutput = new DataOutputStream(client.getOutputStream());
                 dataInput = new DataInputStream(client.getInputStream());
-                output_message = strings[0];
-                output_message = "123.123,56,/789.787,34";
+                String output_message = "Hello#";
                 dataOutput.writeBytes(output_message);
+                Thread.sleep(100);
+
+                DataReceive receive = new DataReceive();
+                DataSend send = new DataSend();
+                receive.start();
+                send.start();
 
             } catch (Exception e) {
                 Log.w("??", e);
             }
+        }
+    }
+    class DataReceive extends Thread {
+        String output_message;
 
-            while (true){
-                try {
-                    byte[] buf = new byte[bufferSize];
-                    int read_Byte  = dataInput.read(buf);
-                    input_message = new String(buf, 0, read_Byte);
-                    if (!input_message.equals(STOP_MSG)){
-                        publishProgress(input_message);
+        public void run() {
+            while (true) {
+                if (stackedData[0] != null) {
+                    try {
+                        // 데이터 보내기
+                        output_message = "";
+                        for (int i=0; i<dataSize; i++) {
+                            output_message += stackedData[i] + "/";
+                        }
+                        output_message += stackedData[dataSize] + "#";
+                        stackedData = new String[dataSize+1];
+
+                        dataOutput.writeBytes(output_message);
+                        Thread.sleep(2);
+
+                    } catch (Exception e) {
+                        Log.w("????", e);
                     }
-                    else{
-                        break;
-                    }
-                    Thread.sleep(2);
-                } catch (Exception e) {
-                    Log.w("????", e);
                 }
             }
-            return null;
         }
+    }
+    class DataSend extends Thread {
+        String input_message;
 
-        @Override
-        protected void onProgressUpdate(String[] params) {
-            TextView result2 = (TextView)findViewById(R.id.result2);
-            TextView result3 = (EditText)findViewById(R.id.result3);
-            result2.setText(""); // Clear the chat box
-            result2.append("보낸 메세지: " + output_message );
-            result3.setText(""); // Clear the chat box
-            result3.append("받은 메세지: " + params[0]);
-        }
+        public void run() {
+            while (true){
+                if (stackedData[0] != null) {
+                    try {
+                        //데이터 받기
+                        byte[] buf;
+                        int read_Byte;
+                        buf = new byte[bufferSize];
+                        read_Byte  = dataInput.read(buf);
+                        input_message = new String(buf, 0, read_Byte);
+                        String temp = input_message.intern();
 
-        @Override
-        protected void onCancelled() {
-            // cancel() 메소드가 호출되었을때 즉,
-            // 강제로 취소하라는 명령이 호출되었을 때
-            // 스레드가 취소되기 전에 수행할 작업(메인 스레드)
-            // super.onCancelled();
+                        while (temp != "endprocess") {
+                            SentenceUpdate(input_message);
+                            Thread.sleep(2);
+
+                            buf = new byte[bufferSize];
+                            read_Byte  = dataInput.read(buf);
+                            input_message = new String(buf, 0, read_Byte);
+                        }
+                        Thread.sleep(2);
+
+                    } catch (Exception e) {
+                        Log.w("????", e);
+                    }
+                }
+            }
         }
     }
 
+    // 문장 업데이트
+    private void SentenceUpdate(String recieveData){
+        // 기존 단어와 다른 단어가 인식되었을 때
+        String this_action = recieveData;
+        if (word != this_action) {
+            // 일단 문장에 추가
+            sentence[sentence_index] = this_action;
+            sentence_index++;
+
+            // 단어간 인식 텀이 너무 길면 문장 초기화
+            if (System.currentTimeMillis()-term > 6000) {
+                sentence = new String[] {"","","","","","","","","","","","","","","","","","","",""};
+                sentence[0] = this_action;
+                sentence_index = 1;
+
+                // 새 단어가 충분한 시간동안 인식되었으면 통과
+            } else if (System.currentTimeMillis()-term > 2000) {
+                // 이전 단어가 "?" 였다면 삭제
+                if (sentence[sentence_index-2] == "?") {
+                    sentence[sentence_index-2] = sentence[sentence_index-1];
+                    sentence[sentence_index-1] = "";
+                    sentence_index--;
+                } else {
+                    TTS(sentence[sentence_index-2]);
+                }
+
+                // 너무 짧은 시간동안 인식 변동이 있었다면 삭제
+            } else {
+                sentence[sentence_index-2] = sentence[sentence_index-1];
+                sentence[sentence_index-1] = "";
+                sentence_index--;
+            }
+
+            // 단어 및 시간 초기화
+            word = "?";
+            term = System.currentTimeMillis();
+        }
+    }
+
+    // TTS
+    private void TTS(String inputText) {
+        tts.setPitch((float)0.6); // 음성 톤 높이
+        tts.setSpeechRate((float)0.1); // 음성 속도
+
+        //QUEUE_FLUSH - 진행중인 출력을 끊고 출력
+        //QUEUE_ADD - 진행중인 출력이 끝난 후에 출력
+        tts.speak(inputText, TextToSpeech.QUEUE_ADD, null);
+    }
 
     /** Sets up the UI components for the live demo with camera input. */
     private void setupLiveDemoUiComponents() {
@@ -374,7 +457,8 @@ public class MainActivity extends AppCompatActivity {
     // 수어 인식
     private void signDetectData(HandsResult result) {
 
-        TextView resultText = (TextView)findViewById(R.id.resultText);
+        TextView resultText0 = (TextView)findViewById(R.id.resultText0);
+        TextView resultText1 = (TextView)findViewById(R.id.resultText1);
         String printText = "";
         for (int t=0; t<20; t++) {
             if (sentence[t] == "") {
@@ -383,7 +467,8 @@ public class MainActivity extends AppCompatActivity {
                 printText = printText + " " + sentence[t];
             }
         }
-        resultText.setText(Float.toString(Math.round((System.currentTimeMillis() - term)/100)/10.0f) + printText);
+        resultText0.setText(Float.toString(Math.round((System.currentTimeMillis() - term)/100)/10.0f) + "s");
+        resultText1.setText(printText);
 
         if (result.multiHandLandmarks().isEmpty()) {
             return;
@@ -396,12 +481,14 @@ public class MainActivity extends AppCompatActivity {
 
             String data = "";
             // 조인트 좌표와 각도 평탄화
-            for (int k=0; k<21; k++) {
+            for (int k=0; k<20; k++) {
                 data += joint.get(k).getX() + ",";
                 data += joint.get(k).getY() + ",";
                 data += joint.get(k).getZ() + ",";
-                data += "0";
             }
+            data += joint.get(20).getX() + ",";
+            data += joint.get(20).getY() + ",";
+            data += joint.get(20).getZ();
             // 데이터 축적
             for (int k=0; k<dataSize; k++) {
                 stackedData[k] = stackedData[k+1];

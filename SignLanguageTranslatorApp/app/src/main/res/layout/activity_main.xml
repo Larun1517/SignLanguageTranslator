@@ -7,50 +7,28 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/resultText"
+        android:id="@+id/resultText0"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_gravity="center"
         android:textColor="#000000"
-        android:padding="5dp"
-        android:textSize="10dp"
+        android:padding="3dp"
+        android:textSize="16dp"
         android:singleLine="true"
         android:text="- result -" />
 
     <TextView
-        android:id="@+id/result1"
+        android:id="@+id/resultText1"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:gravity="center"
         android:layout_gravity="center"
         android:textColor="#000000"
         android:padding="3dp"
-        android:textSize="8dp"
+        android:textSize="20dp"
         android:singleLine="false"
         android:text="- 1 -" />
-    <TextView
-        android:id="@+id/result2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:textColor="#000000"
-        android:padding="3dp"
-        android:textSize="10dp"
-        android:singleLine="true"
-        android:text="- 2 -" />
-    <EditText
-        android:id="@+id/result3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:textColor="#000000"
-        android:padding="3dp"
-        android:textSize="10dp"
-        android:singleLine="true"
-        android:text="- 3 -" />
 
     <FrameLayout
         android:id="@+id/preview_display_layout"
