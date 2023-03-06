@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
     private Socket client;
     private DataOutputStream dataOutput;
     private DataInputStream dataInput;
-    private String ip = "211.106.58.229";
+    private String ip = "";
     private int port = 8080;
     private int bufferSize = 256;
     private static String CONNECT_MSG = "connect";
@@ -148,11 +148,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
-                    //tts.setLanguage(Locale.KOREA);
-                    tts.setLanguage(Locale.ENGLISH);
+                    tts.setLanguage(Locale.KOREA);
+                    //tts.setLanguage(Locale.ENGLISH);
                 }
             }
         });
+
+        EditText inputIP = (EditText)findViewById(R.id.inputIP);
 
         Button startCameraButton = findViewById(R.id.button_start_camera);
         startCameraButton.setVisibility(View.GONE);
@@ -163,6 +165,8 @@ public class MainActivity extends AppCompatActivity {
                     // 서버 연결
                     //Connect connect = new Connect();
                     //connect.execute(CONNECT_MSG);
+                    ip = inputIP.getText().toString();
+
                     ServerConnect serverConnect = new ServerConnect();
                     serverConnect.start();
 
@@ -170,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
                     //Button startCameraButton = findViewById(R.id.button_start_camera);
                     startCameraButton.setVisibility(View.VISIBLE);
                     ServerButton.setVisibility(View.GONE);
+                    inputIP.setVisibility(View.GONE);
                     setupLiveDemoUiComponents();
                 });
         //setupLiveDemoUiComponents();
@@ -313,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // 단어 및 시간 초기화
-            word = "?";
+            word = this_action;
             term = System.currentTimeMillis();
         }
     }
