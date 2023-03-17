@@ -45,9 +45,9 @@ dependencies {
     implementation 'com.google.mediapipe:hands:latest.release'
 
     // Tensorflow
-    implementation 'org.tensorflow:tensorflow-lite:2.11.0'
+    //implementation 'org.tensorflow:tensorflow-lite:2.11.0'
     // This dependency adds the necessary TF op support.
-    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.11.0'
+    //implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.11.0'
 
     //implementation 'org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.0'
     //implementation 'org.tensorflow:tensorflow-lite-gpu:2.9.0'

@@ -54,7 +54,7 @@
         android:inputType="text"
         android:singleLine="true"
         android:layout_margin ="8dp"
-        android:text="211.114.75.212"
+        android:text="211.114.74.25"
         android:textSize="20dp" />
 
     <LinearLayout

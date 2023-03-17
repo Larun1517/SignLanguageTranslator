@@ -15,7 +15,9 @@ package com.example.signlanguagetranslatorapp;
 // limitations under the License.
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
@@ -53,7 +55,7 @@ import com.google.mediapipe.solutions.hands.Hands;
 import com.google.mediapipe.solutions.hands.HandsOptions;
 import com.google.mediapipe.solutions.hands.HandsResult;
 
-import org.tensorflow.lite.Interpreter;
+//import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     private int port = 8080;
     private int bufferSize = 256;
     private static String CONNECT_MSG = "connect";
-    private static String STOP_MSG = "stop";
+    private String STOP_MSG = ""; //stop
 
     // tts
     private TextToSpeech tts;
@@ -158,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button startCameraButton = findViewById(R.id.button_start_camera);
         startCameraButton.setVisibility(View.GONE);
+        setupLiveDemoUiComponents();
 
         Button ServerButton = findViewById(R.id.button_connect);
         ServerButton.setOnClickListener(
@@ -175,9 +178,7 @@ public class MainActivity extends AppCompatActivity {
                     startCameraButton.setVisibility(View.VISIBLE);
                     ServerButton.setVisibility(View.GONE);
                     inputIP.setVisibility(View.GONE);
-                    setupLiveDemoUiComponents();
                 });
-        //setupLiveDemoUiComponents();
     }
 
     @Override
@@ -205,10 +206,66 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        if (STOP_MSG != "stop") {
+            builder.setTitle("안내");
+            builder.setMessage("대기상태로 돌아가시겠습니까?");
+
+            builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    STOP_MSG = "stop";
+                    stopCurrentPipeline();
+
+                    TextView resultText0 = (TextView)findViewById(R.id.resultText0);
+                    TextView resultText1 = (TextView)findViewById(R.id.resultText1);
+                    EditText inputIP = (EditText)findViewById(R.id.inputIP);
+                    Button startCameraButton = findViewById(R.id.button_start_camera);
+                    Button ServerButton = findViewById(R.id.button_connect);
+
+                    resultText0.setText("- timer -");
+                    resultText1.setText("- sentence here -");
+                    inputIP.setVisibility(View.VISIBLE);
+                    startCameraButton.setVisibility(View.GONE);
+                    ServerButton.setVisibility(View.VISIBLE);
+                }
+            });
+            builder.setNeutralButton("아니오", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {}
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else {
+            builder.setTitle("안내");
+            builder.setMessage("앱을 종료하시겠습니까?");
+
+            builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+            builder.setNeutralButton("아니오", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {}
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+
+    }
+
     /** 서버 연결 */
     class ServerConnect extends Thread {
         public void run() {
             try {
+                STOP_MSG = "";
                 client = new Socket(ip, port);
                 dataOutput = new DataOutputStream(client.getOutputStream());
                 dataInput = new DataInputStream(client.getInputStream());
@@ -230,16 +287,16 @@ public class MainActivity extends AppCompatActivity {
         String output_message;
 
         public void run() {
-            while (true) {
+            while (STOP_MSG != "stop") {
                 if (stackedData[0] != null) {
                     try {
                         // 데이터 보내기
                         output_message = "";
-                        for (int i=0; i<dataSize; i++) {
+                        for (int i = 0; i < dataSize; i++) {
                             output_message += stackedData[i] + "/";
                         }
                         output_message += stackedData[dataSize] + "#";
-                        stackedData = new String[dataSize+1];
+                        stackedData = new String[dataSize + 1];
 
                         dataOutput.writeBytes(output_message);
                         Thread.sleep(2);
@@ -249,13 +306,19 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+            try {
+                output_message = "stop#";
+                dataOutput.writeBytes(output_message);
+            } catch (Exception e) {
+                Log.w("???", e);
+            }
         }
     }
     class DataSend extends Thread {
         String input_message;
 
         public void run() {
-            while (true){
+            while (STOP_MSG != "stop"){
                 if (stackedData[0] != null) {
                     try {
                         //데이터 받기
@@ -338,17 +401,20 @@ public class MainActivity extends AppCompatActivity {
         Button startCameraButton = findViewById(R.id.button_start_camera);
         startCameraButton.setOnClickListener(
                 v -> {
-                    if (inputSource == InputSource.CAMERA) {
-                        return;
-                    }
-                    stopCurrentPipeline();
-                    setupStreamingModePipeline(InputSource.CAMERA);
                     startCameraButton.setVisibility(View.GONE);
+                    //stopCurrentPipeline();
+                    try {
+                        setupStreamingModePipeline(InputSource.CAMERA);
+                    } catch (Exception e) {
+                        TextView resultText0 = (TextView)findViewById(R.id.resultText0);
+                        resultText0.setText(e.getMessage());
+                    }
                 });
     }
 
     /** Sets up core workflow for streaming mode. */
     private void setupStreamingModePipeline(InputSource inputSource) {
+
         this.inputSource = inputSource;
         // Initializes a new MediaPipe Hands solution instance in the streaming mode.
         hands =
@@ -499,184 +565,10 @@ public class MainActivity extends AppCompatActivity {
                 stackedData[k] = stackedData[k+1];
             }
             stackedData[dataSize] = data;
-
-            /*
-            float[][] j1 = new float[20][3];
-            float[][] j2 = new float[20][3];
-            float[][] v = new float[21][3];
-            float[] angle = new float[16];
-            float[] d = new float[104];
-
-
-            // double타입 어레이로 변환
-            //[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], :3]
-            for (int i=1; i < 20; i++) {
-                j1[i][0] = joint.get(i).getX();
-                j1[i][1] = joint.get(i).getY();
-                j1[i][2] = joint.get(i).getZ();
-            }
-            //[[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19], :3]
-            for (int i=0; i < 19; i++) {
-                j2[i][0] = joint.get(i).getX();
-                j2[i][1] = joint.get(i).getY();
-                j2[i][2] = joint.get(i).getZ();
-            }
-            //[[0,1,2,3,0,5,6,7,0,9,10,11,0,13,14,15,0,17,18,19], :3]
-            j2[4] = j2[0];
-            j2[8] = j2[0];
-            j2[12] = j2[0];
-            j2[16] = j2[0];
-
-            // 각 조인트의 벡터 구하기
-            v[0][0] = j2[0][0] - (float)0.5;
-            v[0][1] = j2[0][1] - (float)0.5;
-            v[0][2] = j2[0][2] - (float)-1;
-            //[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], :3]
-            //[[0,1,2,3,0,5,6,7,0,9 ,10,11,0 ,13,14,15,0 ,17,18,19], :3]
-            for (int j=0; j<20; j++) {
-                v[j+1][0] = j1[j][0] - j2[j][0];
-                v[j+1][1] = j1[j][1] - j2[j][1];
-                v[j+1][2] = j1[j][2] - j2[j][2];
-            }
-
-            // 내적 구하고 아크코사인
-            //[[0,1,2,3,-,5,6,7,-,9 ,10,11,-,13,14,15,-,17,18,19], :3]
-            //[[1,2,3,4,-,6,7,8,-,10,11,12,-,14,15,16,-,18,19,20], :3]
-            int temp = 0;
-            for (int j=0; j<20; j++) {
-                if (j==4 || j==8 || j==12 || j==16) {
-                    temp++;
-                }else{
-                    angle[j-temp] =
-                            v[j][0] * v[j + 1][0] +
-                            v[j][1] * v[j + 1][1] +
-                            v[j][2] * v[j + 1][2];
-                }
-            }
-            for (int k=0; k<16; k++) {
-                angle[k] = (float) Math.toDegrees(Math.acos(angle[k]));
-            }
-
-            // 조인트 좌표와 각도 평탄화
-            for (int k=0; k<21; k++) {
-                d[k*4] = joint.get(k).getX();
-                d[k*4+1] = joint.get(k).getY();
-                d[k*4+2] = joint.get(k).getZ();
-                d[k*4+3] = 0;
-            }
-            d[84] = (float) 0.5;
-            d[85] = (float) 0.5;
-            d[86] = (float) -1;
-            for (int k=0; k<16; k++) {
-                d[87+k] = angle[k];
-            }
-
-            // 데이터 축적
-            for (int k=0; k<9; k++) {
-                input[0][k] = input[0][k+1].clone();
-            }
-            input[0][9] = d;
-
-
-            //10개 모였는지 체크
-            if (input[0][0][86] != -1) {
-                continue;
-            }
-
-            float[][] output = new float[1][27];
-            Interpreter tflite = getTfliteInterpreter("model_mb1.tflite");
-            try {
-                tflite.run(input, output);
-
-                // 출력
-                TextView result1 = (TextView)findViewById(R.id.result1);
-                TextView result2 = (TextView)findViewById(R.id.result2);
-                TextView result3 = (EditText)findViewById(R.id.result3);
-                String outputText = "";
-
-                for (int wtf=0; wtf<27; wtf++) {
-                    outputText = outputText + "  " + actions[wtf] + ":";
-                    outputText += Float.toString(Math.round(output[0][wtf]*100)/100.0f);
-                }
-                result1.setText(outputText);
-
-                outputText = action_seq[0]+ "/" +action_seq[1]+ "/" +action_seq[2];
-                result2.setText(outputText);
-
-
-                // 데이타 평준화
-                String Tempresult = "[";
-                for (int wtf=0; wtf<104; wtf++) {
-                    Tempresult += String.valueOf(d[wtf]);
-                    Tempresult += "/";
-                }
-                Tempresult += "]";
-                result3.setText(Tempresult);
-
-
-                // 제일 유사한 수어 확인
-                int outputMaxIndex = 0;
-                for (int l = 0; l < 27; l++) {
-                    if (output[0][outputMaxIndex] < output[0][l]) {
-                        outputMaxIndex = l;
-                    }
-                }
-                // 분석 결과 스택
-                if (output[0][outputMaxIndex] > 0.9) {
-                    action_seq[0] = action_seq[1];
-                    action_seq[1] = action_seq[2];
-                    action_seq[2] = actions[outputMaxIndex];
-
-                    // 결과 검증 | 연속적으로 3회동안 같은 결과가 나왔는가?
-                    String this_action = "?";
-                    if (action_seq[0] == action_seq[1] && action_seq[1] == action_seq[2]) {
-                        this_action = actions[outputMaxIndex];
-                    }
-
-                    // 기존 단어와 다른 단어가 인식되었을 때
-
-                    if (word != this_action) {
-                        // 일단 문장에 추가
-                        sentence[sentence_index] = this_action;
-                        sentence_index++;
-
-                        // 단어간 인식 텀이 너무 길면 문장 초기화
-                        if (System.currentTimeMillis()-term > 6000) {
-                            sentence = new String[] {"","","","","","","","","","","","","","","","","","","",""};
-                            sentence[0] = this_action;
-                            sentence_index = 1;
-
-                        // 새 단어가 충분한 시간동안 인식되었으면 통과
-                        } else if (System.currentTimeMillis()-term > 2000) {
-                            // 이전 단어가 "?" 였다면 삭제
-                            if (sentence[sentence_index-2] == "?") {
-                                sentence[sentence_index-2] = sentence[sentence_index-1];
-                                sentence[sentence_index-1] = "";
-                                sentence_index--;
-                            }
-
-                        // 너무 짧은 시간동안 인식 변동이 있었다면 삭제
-                        } else {
-                            sentence[sentence_index-2] = sentence[sentence_index-1];
-                            sentence[sentence_index-1] = "";
-                            sentence_index--;
-                        }
-
-                        // 단어 및 시간 초기화
-                        word = "?";
-                        term = System.currentTimeMillis();
-                    }
-                }
-                tflite.close();
-
-            }catch (Exception e){
-                resultText.setText(e.getMessage());
-            }
-            */
-
         }
     }
 
+    /*
     // 학습모델 전처리
     private MappedByteBuffer loadModelFile(Activity activity, String modelPath) throws IOException {
         AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(modelPath);
@@ -696,4 +588,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return null;
     }
+    */
 }
