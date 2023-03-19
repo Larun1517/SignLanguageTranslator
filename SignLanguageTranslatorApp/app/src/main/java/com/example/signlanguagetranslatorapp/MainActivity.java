@@ -388,8 +388,8 @@ public class MainActivity extends AppCompatActivity {
 
     // TTS
     private void TTS(String inputText) {
-        tts.setPitch((float)0.6); // 음성 톤 높이
-        tts.setSpeechRate((float)0.1); // 음성 속도
+        tts.setPitch((float)0.8); // 음성 톤 높이
+        tts.setSpeechRate((float)1.0); // 음성 속도
 
         //QUEUE_FLUSH - 진행중인 출력을 끊고 출력
         //QUEUE_ADD - 진행중인 출력이 끝난 후에 출력
@@ -567,26 +567,4 @@ public class MainActivity extends AppCompatActivity {
             stackedData[dataSize] = data;
         }
     }
-
-    /*
-    // 학습모델 전처리
-    private MappedByteBuffer loadModelFile(Activity activity, String modelPath) throws IOException {
-        AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(modelPath);
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-        FileChannel fileChannel = inputStream.getChannel();
-        long startOffset = fileDescriptor.getStartOffset();
-        long declareLength = fileDescriptor.getDeclaredLength();
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength);
-    }
-
-    // 학습모델 로드
-    private Interpreter getTfliteInterpreter(String modelPath) {
-        try{
-            return new Interpreter(loadModelFile(MainActivity.this, modelPath));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    */
 }

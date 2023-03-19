@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="320dp"
+    android:layout_height="280dp"
+    android:gravity="center"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="20dp"
+    android:paddingTop="4dp"
+    android:background="@drawable/dialog_setting_background"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="14dp"
+        android:paddingBottom="10dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:shadowColor="#333"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="7"
+        android:textColor="#fff"
+        android:textSize="22dp"
+        android:text="어플리케이션 설정" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".6"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:gravity="center"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
+            android:shadowColor="#999"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="5"
+            android:textColor="#000000"
+            android:textSize="18dp"
+            android:text="서버 주소" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:background="#ecccff"/>
+
+        <EditText
+            android:id="@+id/edittext_ip"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="bottom|center"
+            android:layout_weight="3"
+            android:layout_marginBottom="0dp"
+            android:inputType="text"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:textSize="16dp"
+            android:text="211.106.58.219" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.6"
+        android:layout_marginBottom="0dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:gravity="center"
+            android:layout_height="match_parent"
+            android:layout_weight="1.3"
+            android:shadowColor="#999"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="5"
+            android:textColor="#000000"
+            android:textSize="18dp"
+            android:text="음성 높이" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:background="#ecccff"/>
+
+        <SeekBar
+            android:id="@+id/seekBar_ttsPitch"
+            android:layout_width="0dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:max="20"
+            android:min="1"
+            android:progress="8"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.6"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:gravity="center"
+            android:layout_height="match_parent"
+            android:layout_weight="1.3"
+            android:shadowColor="#999"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="5"
+            android:textColor="#000000"
+            android:textSize="18dp"
+            android:text="음성 속도" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:background="#ecccff"/>
+
+        <SeekBar
+            android:id="@+id/seekBar_ttsRate"
+            android:layout_width="0dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:max="20"
+            android:min="1"
+            android:progress="10"/>
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_confirm"
+        android:layout_width="70dp"
+        android:layout_height="0dp"
+        android:layout_weight="0.6"
+        android:background="@drawable/dialog_setting_button"
+        android:text="확인"
+        android:textSize="15dp" />
+</LinearLayout>
