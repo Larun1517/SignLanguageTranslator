@@ -23,6 +23,7 @@
             android:layout_gravity="center"
             android:textColor="#000000"
             android:textSize="38sp"
+            android:fontFamily="@font/ibmplexsanskrsemibold"
             android:text="수어 소통 도우미\n[임시]" />
 
         <View
@@ -50,7 +51,7 @@
                     android:layout_height="match_parent"
                     android:layout_margin="8dp"
                     android:layout_weight="3.2"
-                    android:src="@drawable/test_icon" />
+                    android:src="@drawable/icon_cameraback" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -62,11 +63,11 @@
                         android:layout_weight="3.5"
                         android:gravity="center_vertical|left"
                         android:textColor="#000000"
-                        android:textSize="16dp"
+                        android:textSize="16sp"
                         android:shadowColor="#999"
-                        android:shadowDx="3"
-                        android:shadowDy="3"
-                        android:shadowRadius="5"
+                        android:shadowDx="2"
+                        android:shadowDy="2"
+                        android:shadowRadius="3"
                         android:layout_marginTop="6dp"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -79,7 +80,7 @@
 
                     <TextView
                         android:layout_weight="7"
-                        android:textSize="11dp"
+                        android:textSize="11sp"
                         android:layout_marginBottom="8dp"
                         android:gravity="top|left"
                         android:layout_width="match_parent"
@@ -108,7 +109,7 @@
                     android:layout_height="match_parent"
                     android:layout_margin="8dp"
                     android:layout_weight="3.2"
-                    android:src="@drawable/test_icon" />
+                    android:src="@drawable/icon_camerafront" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -120,11 +121,11 @@
                         android:layout_weight="3.5"
                         android:gravity="center_vertical|left"
                         android:textColor="#000000"
-                        android:textSize="16dp"
+                        android:textSize="16sp"
                         android:shadowColor="#999"
-                        android:shadowDx="3"
-                        android:shadowDy="3"
-                        android:shadowRadius="5"
+                        android:shadowDx="2"
+                        android:shadowDy="2"
+                        android:shadowRadius="3"
                         android:layout_marginTop="6dp"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -137,7 +138,7 @@
 
                     <TextView
                         android:layout_weight="7"
-                        android:textSize="11dp"
+                        android:textSize="11sp"
                         android:layout_marginBottom="8dp"
                         android:gravity="top|left"
                         android:layout_width="match_parent"
@@ -164,7 +165,7 @@
                     android:layout_height="match_parent"
                     android:layout_margin="8dp"
                     android:layout_weight="3.2"
-                    android:src="@drawable/test_icon" />
+                    android:src="@drawable/icon_stt" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -176,11 +177,11 @@
                         android:layout_weight="3.5"
                         android:gravity="center_vertical|left"
                         android:textColor="#000000"
-                        android:textSize="16dp"
+                        android:textSize="16sp"
                         android:shadowColor="#999"
-                        android:shadowDx="3"
-                        android:shadowDy="3"
-                        android:shadowRadius="5"
+                        android:shadowDx="2"
+                        android:shadowDy="2"
+                        android:shadowRadius="3"
                         android:layout_marginTop="6dp"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -193,7 +194,7 @@
 
                     <TextView
                         android:layout_weight="7"
-                        android:textSize="11dp"
+                        android:textSize="11sp"
                         android:layout_marginBottom="8dp"
                         android:gravity="top|left"
                         android:layout_width="match_parent"

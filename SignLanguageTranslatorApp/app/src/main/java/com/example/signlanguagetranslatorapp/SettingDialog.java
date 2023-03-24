@@ -12,17 +12,20 @@ import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class SettingDialog extends Dialog {
     private EditText view_ip;
     private SeekBar view_ttsPitch;
     private SeekBar view_ttsRate;
     private Button view_confirm;
+    private EditText view_termWord;
+    private EditText view_termSentence;
 
-    private String set_ip;
-    private int set_ttsPitch;
-    private int set_ttsRate;
-
-    public SettingDialog(@NonNull Context context, String ip, Float ttsPitch, Float ttsRate) {
+    public SettingDialog(@NonNull Context context, String ip, int ttsPitch, int ttsRate, double termWord, double termSentence) {
         super(context);
         WindowManager.LayoutParams blur = new WindowManager.LayoutParams();
         blur.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -32,26 +35,32 @@ public class SettingDialog extends Dialog {
 
         setContentView(R.layout.dialog_setting);
 
-
         view_ip = findViewById(R.id.edittext_ip);
         view_ip.setText(ip);
         view_ttsPitch = findViewById(R.id.seekBar_ttsPitch);
-        view_ttsPitch.setProgress((int) (ttsPitch*10));
+        view_ttsPitch.setProgress(ttsPitch);
         view_ttsRate = findViewById(R.id.seekBar_ttsRate);
-        view_ttsRate.setProgress((int) (ttsRate*10));
-
+        view_ttsRate.setProgress(ttsRate);
+        view_termWord = findViewById(R.id.edittext_termWord);
+        view_termWord.setText(Double.toString(termWord));
+        view_termSentence = findViewById(R.id.edittext_termSentence);
+        view_termSentence.setText(Double.toString(termSentence));
 
         view_confirm = findViewById(R.id.button_confirm);
-        view_confirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                set_ip = view_ip.getText().toString();
-                set_ttsPitch = view_ttsPitch.getProgress();
-                set_ttsRate = view_ttsRate.getProgress();
+        view_confirm.setOnClickListener(v -> {
+            try (FileOutputStream fos = context.openFileOutput("setting.dat", Context.MODE_PRIVATE)) {
+                DataOutputStream dos = new DataOutputStream(fos);
+                dos.writeUTF((
+                        view_ip.getText().toString() + "/" +
+                        view_ttsPitch.getProgress() + "/" +
+                        view_ttsRate.getProgress() + "/" +
+                        view_termWord.getText().toString() + "/" +
+                        view_termSentence.getText().toString()
+                ));
+                dos.close();
+            } catch (IOException e) { e.printStackTrace(); }
 
-                //이게맞나 데이터 옮겨야하는데
-                dismiss();
-            }
+            dismiss();
         });
     }
 }

@@ -1,13 +1,11 @@
 package com.example.signlanguagetranslatorapp;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -17,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.mediapipe.formats.proto.LandmarkProto;
 import com.google.mediapipe.solutioncore.CameraInput;
 import com.google.mediapipe.solutioncore.SolutionGlSurfaceView;
-import com.google.mediapipe.solutions.hands.HandLandmark;
 import com.google.mediapipe.solutions.hands.Hands;
 import com.google.mediapipe.solutions.hands.HandsOptions;
 import com.google.mediapipe.solutions.hands.HandsResult;
@@ -27,6 +24,7 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -45,7 +43,9 @@ public class CameraActivity extends AppCompatActivity {
     private int sentence_index = 0;
     private String word = "?";
     private Long term = System.currentTimeMillis()-6000;
-    private int dataSize = 10 -1;
+    private int termWord = 2000;
+    private int termSentence = 6000;
+    private static final int dataSize = 10 -1;
     private String[] stackedData = new String[dataSize+1];
 
     // tts
@@ -58,9 +58,9 @@ public class CameraActivity extends AppCompatActivity {
     private DataOutputStream dataOutput;
     private DataInputStream dataInput;
     private String ip = "";
-    private int port = 8080;
-    private int bufferSize = 256;
-    private static String CONNECT_MSG = "connect";
+    private static final int port = 8080;
+    private static final int bufferSize = 256;
+    private static final String CONNECT_MSG = "connect";
     private String connect_status = ""; //stop
 
 
@@ -75,17 +75,16 @@ public class CameraActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         ip = bundle.getString("ip","0.0.0.0");
-        ttsPitch = bundle.getFloat("ttsPitch", 0.8f);
-        ttsRate = bundle.getFloat("ttsRate", 1.0f);
+        ttsPitch = (float) (bundle.getInt("ttsPitch", 8) / 10);
+        ttsRate = (float) (bundle.getInt("ttsRate", 10) / 10);
+        termWord = (int) (bundle.getDouble("termWord", 2) * 1000);
+        termSentence = (int) (bundle.getDouble("termSentence", 6) * 1000);
         cameraMode = bundle.getInt("cameraMode", 1);
 
         // tts 정의
-        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    tts.setLanguage(Locale.KOREA);
-                }
+        tts = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                tts.setLanguage(Locale.KOREA);
             }
         });
 
@@ -117,31 +116,18 @@ public class CameraActivity extends AppCompatActivity {
         builder.setTitle("안내");
         builder.setMessage("대기상태로 돌아가시겠습니까?");
 
-        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                connect_status = "stop";
-                stopCurrentPipeline();
-                /*
-                TextView text_timer = (TextView)findViewById(R.id.text_timer);
-                TextView text_sentence = (TextView)findViewById(R.id.text_sentence);
-                text_timer.setText("- timer -");
-                text_sentence.setText("- sentence -");
-                */
-                Intent intent = new Intent(getBaseContext(), MenuActivity.class);
-                startActivity(intent);
-            }
+        builder.setPositiveButton("예", (dialog, which) -> {
+            connect_status = "stop";
+            stopCurrentPipeline();
+            finish();
         });
-        builder.setNeutralButton("아니오", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {}
-        });
+        builder.setNeutralButton("아니오", (dialog, which) -> {});
 
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
-    // 한전 onCreate 밖으로 빼봄
+    /** 서버 및 미디어파이프 카메라 실행 */ // onCreate 밖으로 빼야 작동함
     private void setupSequence() {
         // 서버 연결
         connect_status = "connecting";
@@ -151,11 +137,10 @@ public class CameraActivity extends AppCompatActivity {
 
         // 미디어파이프 카메라 실행
         //stopCurrentPipeline();
-        setupStreamingModePipeline(InputSource.CAMERA);
+        setupStreamingModePipeline();
     }
 
-
-    /** 서버 연결 */
+    // 서버 관련 스레드
     class ServerConnect extends Thread {
         public void run() {
             try {
@@ -194,7 +179,7 @@ public class CameraActivity extends AppCompatActivity {
                         stackedData = new String[dataSize + 1];
 
                         dataOutput.writeBytes(output_message);
-                        Thread.sleep(2);
+                        Thread.sleep(10);
 
                     } catch (Exception e) {
                         Log.w("????", e);
@@ -226,13 +211,13 @@ public class CameraActivity extends AppCompatActivity {
 
                         while (temp != "endprocess") {
                             SentenceUpdate(input_message);
-                            Thread.sleep(2);
+                            Thread.sleep(10);
 
                             buf = new byte[bufferSize];
                             read_Byte  = dataInput.read(buf);
                             input_message = new String(buf, 0, read_Byte);
                         }
-                        Thread.sleep(2);
+                        Thread.sleep(10);
 
                     } catch (Exception e) {
                         Log.w("_DataSend_Error", e);
@@ -246,22 +231,22 @@ public class CameraActivity extends AppCompatActivity {
     /** 문장 업데이트 */
     private void SentenceUpdate(String recieveData){
         // 기존 단어와 다른 단어가 인식되었을 때
-        String this_action = recieveData;
-        if (word != this_action) {
+        if (!Objects.equals(word, recieveData)) {
             // 일단 문장에 추가
-            sentence[sentence_index] = this_action;
+            sentence[sentence_index] = recieveData;
             sentence_index++;
 
             // 단어간 인식 텀이 너무 길면 문장 초기화
-            if (System.currentTimeMillis()-term > 6000) {
+            if (System.currentTimeMillis()-term > termSentence) {
                 sentence = new String[] {"","","","","","","","","","","","","","","","","","","",""};
-                sentence[0] = this_action;
+                sentence[0] = recieveData;
                 sentence_index = 1;
 
                 // 새 단어가 충분한 시간동안 인식되었으면 통과
-            } else if (System.currentTimeMillis()-term > 2000) {
+            } else if (System.currentTimeMillis()-term > termWord) {
                 // 이전 단어가 "?" 였다면 삭제
-                if (sentence[sentence_index-2] == "?") {
+                //if (sentence[sentence_index-2] == "?") {
+                if (sentence[sentence_index-2].equals("?")) {
                     sentence[sentence_index-2] = sentence[sentence_index-1];
                     sentence[sentence_index-1] = "";
                     sentence_index--;
@@ -277,7 +262,7 @@ public class CameraActivity extends AppCompatActivity {
             }
 
             // 단어 및 시간 초기화
-            word = this_action;
+            word = recieveData;
             term = System.currentTimeMillis();
         }
     }
@@ -313,9 +298,9 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
     /** Sets up core workflow for streaming mode. */
-    private void setupStreamingModePipeline(InputSource inputSource) {
+    private void setupStreamingModePipeline() {
 
-        this.inputSource = inputSource;
+        this.inputSource = InputSource.CAMERA;
         // Initializes a new MediaPipe Hands solution instance in the streaming mode.
         hands =
             new Hands(
@@ -327,10 +312,8 @@ public class CameraActivity extends AppCompatActivity {
                     .build());
         hands.setErrorListener((message, e) -> Log.e(TAG, "MediaPipe Hands error:" + message));
 
-        if (inputSource == InputSource.CAMERA) {
-            cameraInput = new CameraInput(this);
-            cameraInput.setNewFrameListener(textureFrame -> hands.send(textureFrame));
-        }
+        cameraInput = new CameraInput(this);
+        cameraInput.setNewFrameListener(textureFrame -> hands.send(textureFrame));
 
         // Initializes a new Gl surface view with a user-defined HandsResultGlRenderer.
         glSurfaceView = new SolutionGlSurfaceView<>(this, hands.getGlContext(), hands.getGlMajorVersion());
@@ -347,9 +330,7 @@ public class CameraActivity extends AppCompatActivity {
 
         // The runnable to start camera after the gl surface view is attached.
         // For video input source, videoInput.start() will be called when the video uri is available.
-        if (inputSource == InputSource.CAMERA) {
-            glSurfaceView.post(this::startCamera);
-        }
+        glSurfaceView.post(this::startCamera);
 
         // Updates the preview layout.
         FrameLayout frameLayout = findViewById(R.id.preview_display_layout);
@@ -385,7 +366,7 @@ public class CameraActivity extends AppCompatActivity {
                 printText = printText + " " + sentence[t];
             }
         }
-        text_timer.setText(Float.toString(Math.round((System.currentTimeMillis() - term)/100)/10.0f) + "s");
+        text_timer.setText(Math.round((System.currentTimeMillis() - term) / 100) / 10.0f + "s");
         text_sentence.setText(printText);
 
         if (result.multiHandLandmarks().isEmpty()) {
@@ -397,21 +378,21 @@ public class CameraActivity extends AppCompatActivity {
             // 조인트 데이터 전처리
             List<LandmarkProto.NormalizedLandmark> joint = result.multiHandLandmarks().get(n).getLandmarkList();
 
-            String data = "";
+            StringBuilder data = new StringBuilder();
             // 조인트 좌표와 각도 평탄화
             for (int k=0; k<20; k++) {
-                data += joint.get(k).getX() + ",";
-                data += joint.get(k).getY() + ",";
-                data += joint.get(k).getZ() + ",";
+                data.append(joint.get(k).getX()).append(",");
+                data.append(joint.get(k).getY()).append(",");
+                data.append(joint.get(k).getZ()).append(",");
             }
-            data += joint.get(20).getX() + ",";
-            data += joint.get(20).getY() + ",";
-            data += joint.get(20).getZ();
+            data.append(joint.get(20).getX()).append(",");
+            data.append(joint.get(20).getY()).append(",");
+            data.append(joint.get(20).getZ());
             // 데이터 축적
             for (int k=0; k<dataSize; k++) {
                 stackedData[k] = stackedData[k+1];
             }
-            stackedData[dataSize] = data;
+            stackedData[dataSize] = data.toString();
         }
     }
 }

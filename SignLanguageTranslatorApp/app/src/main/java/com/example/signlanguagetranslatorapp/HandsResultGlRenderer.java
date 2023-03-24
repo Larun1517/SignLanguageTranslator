@@ -68,6 +68,7 @@ public class HandsResultGlRenderer implements ResultGlRenderer<HandsResult> {
         GLES20.glUniformMatrix4fv(projectionMatrixHandle, 1, false, projectionMatrix, 0);
         GLES20.glLineWidth(CONNECTION_THICKNESS);
 
+        /*
         int numHands = result.multiHandLandmarks().size();
         for (int i = 0; i < numHands; ++i) {
             boolean isLeftHand = result.multiHandedness().get(i).getLabel().equals("Left");
@@ -82,6 +83,7 @@ public class HandsResultGlRenderer implements ResultGlRenderer<HandsResult> {
                         isLeftHand ? LEFT_HAND_LANDMARK_COLOR : RIGHT_HAND_LANDMARK_COLOR);
             }
         }
+        */
 
     }
 

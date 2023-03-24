@@ -40,7 +40,7 @@
             android:singleLine="true"
             android:text="- Timer -"
             android:textColor="#fff"
-            android:textSize="18dp" />
+            android:textSize="18sp" />
 
         <View
             android:layout_width="match_parent"
@@ -64,6 +64,6 @@
         android:singleLine="false"
         android:text="- Sentence -"
         android:textColor="#000"
-        android:textSize="20dp" />
+        android:textSize="18sp" />
 
 </LinearLayout>
