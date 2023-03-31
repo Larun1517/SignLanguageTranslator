@@ -47,6 +47,7 @@
                 android:value="" />
         </activity>
         <activity android:name=".CameraActivity" />
+        <activity android:name=".STTActivity" />
     </application>
 
 </manifest>

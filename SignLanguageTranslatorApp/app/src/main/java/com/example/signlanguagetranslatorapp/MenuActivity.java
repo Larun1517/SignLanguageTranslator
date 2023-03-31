@@ -92,6 +92,8 @@ public class MenuActivity extends AppCompatActivity {
         LinearLayout StartSTT = findViewById(R.id.start_button_stt);
         StartSTT.setOnClickListener( v -> {
             // STT 액티비티
+            Intent intent = new Intent(getApplicationContext(), STTActivity.class);
+            startActivity(intent);
         });
 
         // 어플리케이션 설정
