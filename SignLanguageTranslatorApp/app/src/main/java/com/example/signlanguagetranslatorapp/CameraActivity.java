@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -87,6 +89,16 @@ public class CameraActivity extends AppCompatActivity {
                 tts.setLanguage(Locale.KOREA);
             }
         });
+
+        // stt 다이얼로그
+        Button Setting = findViewById(R.id.button_sttDialog);
+        Setting.setOnClickListener( v -> {
+            STTDialog sttDialog = new STTDialog(CameraActivity.this);
+            sttDialog.setCancelable(true);
+            sttDialog.getWindow().setGravity(Gravity.CENTER);
+            sttDialog.show();
+        });
+
 
         setupSequence();
     }

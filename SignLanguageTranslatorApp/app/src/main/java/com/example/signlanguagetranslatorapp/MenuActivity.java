@@ -54,9 +54,12 @@ public class MenuActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
-        // 카메라 권한 확인 및 요청
+        // 앱 필요 권한 확인 및 요청
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 101);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.RECORD_AUDIO},101);
         }
 
         // 상대방의 수어 번역하기
@@ -89,6 +92,7 @@ public class MenuActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        /*
         // 목소리를 글자로 바꾸기
         LinearLayout StartSTT = findViewById(R.id.start_button_stt);
         StartSTT.setOnClickListener( v -> {
@@ -96,6 +100,7 @@ public class MenuActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), STTActivity.class);
             startActivity(intent);
         });
+        */
 
         // 어플리케이션 설정
         Button Setting = findViewById(R.id.button_setting);
