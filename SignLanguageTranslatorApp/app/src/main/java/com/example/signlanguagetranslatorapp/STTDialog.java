@@ -29,6 +29,7 @@ public class STTDialog extends Dialog {
     private Button view_confirm;
     private ImageButton view_sttBtn;
     private TextView view_text;
+    private TextView view_info;
 
     public STTDialog(@NonNull Context context) {
         super(context);
@@ -48,9 +49,11 @@ public class STTDialog extends Dialog {
         view_confirm.setOnClickListener(v -> { dismiss(); });
 
         view_text = (TextView)findViewById(R.id.sttResult);
+        view_info = (TextView)findViewById(R.id.stt_info);
         view_sttBtn = (ImageButton) findViewById(R.id.button_record);
         view_sttBtn.setOnClickListener(v -> {
-            view_sttBtn.setImageResource(R.drawable.icon_mic_off);
+            view_sttBtn.setImageResource(R.drawable.icon_mic_on);
+            view_info.setText("인식 중입니다.");
 
             mRecognizer=SpeechRecognizer.createSpeechRecognizer(context);
             mRecognizer.setRecognitionListener(listener);
@@ -79,7 +82,9 @@ public class STTDialog extends Dialog {
 
         @Override
         public void onResults(Bundle results) {
-            view_sttBtn.setImageResource(R.drawable.icon_mic_on);
+            view_sttBtn.setImageResource(R.drawable.icon_mic_off);
+            view_info.setText("버튼을 눌러 인식을 시작합니다.");
+
             ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             for(int i = 0; i < matches.size() ; i++){
                 view_text.setText(matches.get(i));
