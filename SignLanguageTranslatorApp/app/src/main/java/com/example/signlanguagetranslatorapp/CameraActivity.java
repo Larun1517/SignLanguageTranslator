@@ -390,6 +390,9 @@ public class CameraActivity extends AppCompatActivity {
             // 조인트 데이터 전처리
             List<LandmarkProto.NormalizedLandmark> joint = result.multiHandLandmarks().get(n).getLandmarkList();
 
+            //왼손?
+            //result.multiHandedness().get(n).getLabel().equals("Left");
+
             StringBuilder data = new StringBuilder();
             // 조인트 좌표와 각도 평탄화
             for (int k=0; k<20; k++) {
@@ -408,5 +411,3 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 }
-
-

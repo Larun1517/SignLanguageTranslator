@@ -52,9 +52,6 @@ public class STTDialog extends Dialog {
         view_info = (TextView)findViewById(R.id.stt_info);
         view_sttBtn = (ImageButton) findViewById(R.id.button_record);
         view_sttBtn.setOnClickListener(v -> {
-            view_sttBtn.setImageResource(R.drawable.icon_mic_on);
-            view_info.setText("인식 중입니다.");
-
             mRecognizer=SpeechRecognizer.createSpeechRecognizer(context);
             mRecognizer.setRecognitionListener(listener);
             mRecognizer.startListening(intent);
@@ -63,7 +60,10 @@ public class STTDialog extends Dialog {
 
     private RecognitionListener listener = new RecognitionListener() {
         @Override
-        public void onReadyForSpeech(Bundle params) {}
+        public void onReadyForSpeech(Bundle params) {
+            view_sttBtn.setImageResource(R.drawable.icon_mic_on);
+            view_info.setText("인식 중입니다.");
+        }
 
         @Override
         public void onBeginningOfSpeech() {}

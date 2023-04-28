@@ -69,7 +69,7 @@
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
             android:textSize="16dp"
-            android:text="211.106.58.219" />
+            android:text="- ip -" />
     </LinearLayout>
 
     <View

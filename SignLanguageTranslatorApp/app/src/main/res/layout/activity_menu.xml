@@ -14,226 +14,237 @@
         tools:layout_editor_absoluteX="1dp"
         tools:layout_editor_absoluteY="1dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1.2"
-            android:gravity="center"
-            android:background="#fff"
-            android:layout_gravity="center"
-            android:textColor="#000000"
-            android:textSize="38sp"
-            android:fontFamily="@font/ibmplexsanskrsemibold"
-            android:text="수어 소통 도우미\n[임시]" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.6"
+                android:paddingLeft="18dp"
+                android:background="#fff"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="6"
+                    android:paddingTop="16dp"
+                    android:gravity="left|center_vertical"
+                    android:layout_gravity="center"
+                    android:textColor="#000"
+                    android:textSize="34sp"
+                    android:shadowColor="#999"
+                    android:shadowDx="5"
+                    android:shadowDy="5"
+                    android:shadowRadius="3"
+                    android:fontFamily="@font/ibmplexsanskrsemibold"
+                    android:text="수어 소통 도우미" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="left|center_vertical"
+                    android:layout_gravity="center"
+                    android:textColor="#7d7dec"
+                    android:textSize="12sp"
+                    android:shadowColor="#7d7dec"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="7"
+                    android:text="• 수어를 문자로 번역할 수 있습니다" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="left|center_vertical"
+                    android:layout_gravity="center"
+                    android:textColor="#a084ee"
+                    android:textSize="12sp"
+                    android:shadowColor="#a084ee"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="7"
+                    android:text="• 수어를 음성으로 변환할 수 있습니다" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="left|center_vertical"
+                    android:layout_gravity="center"
+                    android:textColor="#cb8cf0"
+                    android:textSize="12sp"
+                    android:shadowColor="#cb8cf0"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="7"
+                    android:text="• 음성을 문자로 변환할 수 있습니다" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+                </View>
+            </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.20"
+            android:layout_weight="0.3"
             android:background="@drawable/menu_frame_top" />
 
-            <LinearLayout
-                android:id="@+id/start_button_camera_back"
-
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.9"
-                android:background="@drawable/menu_button3"
-                android:paddingRight="27dp"
-                android:paddingBottom="5dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="25dp"
-                android:layout_marginBottom="28dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:layout_weight="3.2"
-                    android:src="@drawable/icon_cameraback" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="6"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_weight="3.5"
-                        android:gravity="center_vertical|left"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
-                        android:shadowColor="#999"
-                        android:shadowDx="2"
-                        android:shadowDy="2"
-                        android:shadowRadius="3"
-                        android:layout_marginTop="6dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:text="상대방의 수어 번역하기" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2dp"
-                        android:background="#7d7dec"/>
-
-                    <TextView
-                        android:layout_weight="7"
-                        android:textSize="11sp"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="top|left"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:text="핸드폰을 손에 들고 동작을 촬영하여\n수어를 문자와 음성으로 번역합니다." />
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/start_button_camera_front"
-
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.9"
-                android:background="@drawable/menu_button2"
-                android:paddingRight="27dp"
-                android:paddingBottom="5dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="25dp"
-                android:layout_marginBottom="28dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:layout_weight="3.2"
-                    android:src="@drawable/icon_camerafront" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="6"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_weight="3.5"
-                        android:gravity="center_vertical|left"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
-                        android:shadowColor="#999"
-                        android:shadowDx="2"
-                        android:shadowDy="2"
-                        android:shadowRadius="3"
-                        android:layout_marginTop="6dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:text="나의 수어 번역하기" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2dp"
-                        android:background="#a084ee"/>
-
-                    <TextView
-                        android:layout_weight="7"
-                        android:textSize="11sp"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="top|left"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:text="핸드폰을 거치하고 동작을 촬영하여\n수어를 문자와 음성으로 번역합니다." />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/start_button_stt"
-
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.9"
-                android:background="@drawable/menu_button1"
-                android:paddingRight="27dp"
-                android:paddingBottom="5dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="25dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:layout_weight="3.2"
-                    android:src="@drawable/icon_stt" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="6"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_weight="3.5"
-                        android:gravity="center_vertical|left"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
-                        android:shadowColor="#999"
-                        android:shadowDx="2"
-                        android:shadowDy="2"
-                        android:shadowRadius="3"
-                        android:layout_marginTop="6dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:text="목소리를 글자로 바꾸기" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2dp"
-                        android:background="#cb8cf0"/>
-
-                    <TextView
-                        android:layout_weight="7"
-                        android:textSize="11sp"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="top|left"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:text="농인이 읽을수 있도록\n음성을 글로 변환해 표시합니다." />
-                </LinearLayout>
-            </LinearLayout>
-
         <LinearLayout
-            android:layout_weight="0.4"
+            android:id="@+id/start_button_camera_back"
+
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="12dp"
+            android:layout_weight="0.9"
+            android:background="@drawable/menu_button3"
+            android:paddingRight="27dp"
+            android:paddingBottom="5dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginBottom="28dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:layout_weight="3.2"
+                android:src="@drawable/icon_cameraback" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="6"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_weight="3.5"
+                    android:gravity="center_vertical|left"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:shadowColor="#999"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="3"
+                    android:layout_marginTop="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="상대방의 수어 번역하기" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#7d7dec"/>
+
+                <TextView
+                    android:layout_weight="7"
+                    android:textSize="11sp"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="top|left"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="핸드폰을 손에 들고 동작을 촬영하여\n수어를 문자와 음성으로 번역합니다." />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/start_button_camera_front"
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.9"
+            android:background="@drawable/menu_button2"
+            android:paddingRight="27dp"
+            android:paddingBottom="5dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginBottom="28dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:layout_weight="3.2"
+                android:src="@drawable/icon_camerafront" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="6"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_weight="3.5"
+                    android:gravity="center_vertical|left"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:shadowColor="#999"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="3"
+                    android:layout_marginTop="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="나의 수어 번역하기" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#a084ee"/>
+
+                <TextView
+                    android:layout_weight="7"
+                    android:textSize="11sp"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="top|left"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="핸드폰을 거치하고 동작을 촬영하여\n수어를 문자와 음성으로 번역합니다." />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_setting"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.3"
+            android:background="@drawable/menu_button1"
+            android:paddingRight="14dp"
+            android:paddingBottom="3dp"
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="95dp"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textview0"
-                android:layout_width="0dp"
+                android:layout_weight="3.5"
+                android:gravity="center"
+                android:textColor="#000000"
+                android:textSize="14sp"
+                android:shadowColor="#999"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="3"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="top|left"
-                android:layout_gravity="center"
-                android:paddingLeft="30dp"
-                android:textColor="#fff"
-                android:shadowColor="#333"
-                android:shadowDx="3"
-                android:shadowDy="3"
-                android:shadowRadius="7"
-                android:textSize="20sp"
-                android:text="원하는 기능을 터치하세요" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_setting"
-
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/setting_icon"
-                android:layout_marginRight="28dp"
-                android:text="" />
+                android:text="어플리케이션 설정" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/textview0"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.6"
+            android:paddingBottom="8dp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textColor="#fff"
+            android:shadowColor="#333"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="7"
+            android:textSize="20sp"
+            android:text="원하는 기능을 터치하세요" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

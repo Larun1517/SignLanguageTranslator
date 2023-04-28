@@ -92,18 +92,8 @@ public class MenuActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        /*
-        // 목소리를 글자로 바꾸기
-        LinearLayout StartSTT = findViewById(R.id.start_button_stt);
-        StartSTT.setOnClickListener( v -> {
-            // STT 액티비티
-            Intent intent = new Intent(getApplicationContext(), STTActivity.class);
-            startActivity(intent);
-        });
-        */
-
         // 어플리케이션 설정
-        Button Setting = findViewById(R.id.button_setting);
+        LinearLayout Setting = findViewById(R.id.button_setting);
         Setting.setOnClickListener( v -> {
             readSetting();
 
