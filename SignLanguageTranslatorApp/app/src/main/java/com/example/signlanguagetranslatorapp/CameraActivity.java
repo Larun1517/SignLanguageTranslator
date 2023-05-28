@@ -222,6 +222,13 @@ public class CameraActivity extends AppCompatActivity {
                         String temp = input_message.intern();
 
                         while (temp != "endprocess") {
+                            String check[] = input_message.split("");
+                            for (int i=0; i<check.length; i++) {
+                                if (check[i].equals("#")) {
+                                    input_message = input_message.substring(0,i-1);
+                                    break;
+                                }
+                            }
                             SentenceUpdate(input_message);
                             Thread.sleep(10);
 
