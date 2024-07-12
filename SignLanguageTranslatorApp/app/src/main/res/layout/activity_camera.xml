@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:keepScreenOn="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9"
+        android:background="#ddd">
+        <FrameLayout
+            android:id="@+id/preview_display_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="- Camera -" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/text_timer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="left|bottom"
+            android:paddingBottom="20dp"
+            android:paddingLeft="12dp"
+            android:shadowColor="#000"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="5"
+            android:singleLine="true"
+            android:text="- Timer -"
+            android:textColor="#fff"
+            android:textSize="18sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_sttDialog"
+            android:layout_width="92dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.65"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="24dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/dialog_setting_button"
+            android:text="음성인식"
+            android:textSize="18dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_gravity="bottom"
+            android:layout_weight="0.20"
+            android:background="@drawable/camera_frame_bottom" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/text_sentence"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/camera_sentence"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:paddingBottom="16dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:singleLine="false"
+        android:text="- Sentence -"
+        android:textColor="#000"
+        android:textSize="18sp" />
+
+</LinearLayout>
